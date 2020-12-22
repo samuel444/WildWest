@@ -103,11 +103,14 @@ def game():
     # Loading all the colours in
     colours = [pygame.color.Color('#000000'),pygame.color.Color('#8A0303'),pygame.color.Color('#745A23'),pygame.color.Color('#ffffff')]
 
+    # Loading all the sounds into a list
+    sounds = [pygame.mixer.Sound('assets/sounds/damage.wav'),pygame.mixer.Sound('assets/sounds/knife.wav'),pygame.mixer.Sound('assets/sounds/shot.wav'),pygame.mixer.Sound('assets/sounds/walking.wav')]
+
     # List for all the player attributes
     character = [800, 8, 820, 7440, 7440, 'r', 0, sprites[0][2]]
 
     # Timers for use in program
-    timers = [0,0,120,0,50]
+    timers = [0,0,120,0,50,0]
 
     # Initialising some lists to use in the program
     timingsSpawns = [250, 230, 210, 200, 190, 180, 170, 170, 160, 156, 155, 150, 145, 140, 135, 130, 128, 125, 120, 120, 120, 118, 115, 115, 110, 110, 105, 100, 100, 100, 100, 100, 97, 95, 93, 91, 90, 88, 86, 87, 87, 87, 85, 83, 80, 78, 78, 78, 78, 75, 72, 70, 70, 70, 65, 65, 60, 59, 58, 57, 56, 56, 56, 55, 54, 53, 52, 52, 51, 50, 50, 50, 50, 50, 48, 45, 45, 45, 45, 44, 44, 44, 43, 42, 41, 41, 41, 40, 39, 39, 38, 38, 37, 37, 36, 35, 35, 35, 35, 34, 33, 32, 32, 32, 32, 31, 31, 31]
@@ -238,6 +241,12 @@ def game():
             # Changing the direction of the character to right
             character[5] = 'r'
 
+            # Checking if the timer has reset and the character is touching the floor
+            if timers[3] == 1 and character[3] >= character[4] and character[3] < (character[4] + 20):
+
+                # Plays walking sound effect if so
+                sounds[3].play()
+
             # Checking if the timer shows that the character should have the walking sprite
             if timers[3] > 0 and timers[3] < 15:
 
@@ -260,6 +269,8 @@ def game():
         # Checks if the key 'a' is being pressed
         if keys[pygame.K_a]:
             character[5] = 'l'
+            if timers[3] == 1 and character[3] > character[4] and character[3] < (character[4] + 10):
+                sounds[3].play()
             if timers[3] > 0 and timers[3] < 15:
                 if character[7] == flippedSprites[0][2]:
                     character[7] = sprites[0][5]
@@ -382,7 +393,11 @@ def game():
                     enemies[j][3] += 1
             else:
 
-                # If the enemy is close to the player then it will change the variable to ture, this will tel; the program that it is in the middle of stabbing
+                # Checking that the enemy was not previously attacking
+                if not(enemies[j][6]):
+                    sounds[1].play()
+
+                # If the enemy is close to the player then it will change the variable to true, this will tell the program that it is in the middle of stabbing
                 enemies[j][6] = True
             
             # Checking if the timer shows that the enemy should be walking or not, and that the enemy isn't currently attacking
@@ -426,12 +441,24 @@ def game():
                             
                             # If it is, then it will decrease the players health
                             character[0] -= 7
+
+                            # Checking timer to see if the sound has been played recently
+                            if timers[5] > 30:
+
+                                # Playing damage sound effect
+                                sounds[0].play()
+
+                                # Resetting timer
+                                timers[5] = 0
                     else:
 
                         # This is for the other direction, there is no need to change the enemies x coordinate for this
                         look = flippedSprites[1][2]
                         if (enemies[j][0] + 135) > character[2] and (enemies[j][0] + 135) < (character[2] + 96) and (enemies[j][1] + 960) > character[3] and (enemies[j][1] + 960) < (character[3] + 1560):
                             character[0] -= 7
+                            if timers[5] > 30:
+                                sounds[0].play()
+                                timers[5] = 0
                 
                 # This checks if the enemy should stop attacking
                 elif enemies[j][7] == 25:
@@ -592,6 +619,7 @@ def game():
         # Adding onto some timers
         timers[3] += 1
         timers[4] += 1
+        timers[5] += 1
 
         # Checking if an event has happened
         for event in pygame.event.get():
@@ -614,6 +642,9 @@ def game():
 
                     # Removing one bullet from the magazine
                     character[1] -= 1
+
+                    # Playing the shooting sound effect
+                    sounds[2].play()
 
                     # Creating the y coordinate of the bullet, which is where the gun is
                     y1 = character[3] + 540
